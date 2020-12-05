@@ -12,7 +12,7 @@ type Forest struct {
 	repeatWidth int
 }
 
-func createForest(fileName string) Forest {
+func createForest() Forest {
 	file, err := os.Open("C:\\Workarea\\advent-2020-go\\inputs\\day03.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +48,7 @@ func (forest Forest) countTreesAtAngle(right, down int) int {
 }
 
 func main() {
-	forest := createForest("C:\\Workarea\\advent-2020-go\\inputs\\day03.txt")
+	forest := createForest()
 	r3d1 := forest.countTreesAtAngle(3, 1)
 	fmt.Println(r3d1)
 
