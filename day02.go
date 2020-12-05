@@ -27,7 +27,7 @@ func (passwordInfo PasswordInfo) ValidPart2() bool {
 	return (firstMatches && !secondMatches) || (secondMatches && !firstMatches)
 }
 
-func createParsewordInfo(input string) PasswordInfo {
+func parsewordInfo(input string) PasswordInfo {
 	halves := strings.Split(input, ": ")
 	password := halves[1]
 
@@ -62,7 +62,7 @@ func main() {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		passwordInfo := createParsewordInfo(line)
+		passwordInfo := parsewordInfo(line)
 		if passwordInfo.ValidPart1() {
 			runningTotalPart1++
 		}
