@@ -15,7 +15,7 @@ func check(e error) {
 }
 
 func main() {
-	file, err := os.Open("C:\\Workarea\\advent2020\\inputs\\day01.txt")
+	file, err := os.Open("C:\\Workarea\\advent-2020-go\\inputs\\day01.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
