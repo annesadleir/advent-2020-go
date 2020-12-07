@@ -84,16 +84,16 @@ func readCustomsGroupsForPart2() []CustomsGroup {
 
 func main() {
 
-	//groups := readCustomsGroups()
-	//
-	runningTotal := 0
-	//for _, group := range groups {
-	//	runningTotal += group.groupPositiveCount()
-	//}
-	//
-	//fmt.Println("Part one answer: " + strconv.Itoa(runningTotal))
+	groups := readCustomsGroups()
 
-	groups := readCustomsGroupsForPart2()
+	runningTotal := 0
+	for _, group := range groups {
+		runningTotal += group.groupPositiveCount()
+	}
+
+	fmt.Println("Part one answer: " + strconv.Itoa(runningTotal))
+
+	groups = readCustomsGroupsForPart2()
 
 	runningTotal = 0
 	for _, group := range groups {
