@@ -11,6 +11,7 @@ import (
 type Ship struct {
 	Position  Position
 	Direction CompassPoint
+	Waypoint  Position
 }
 
 type Position struct {
@@ -76,13 +77,73 @@ func readNavigationInstructions() []Instruction {
 
 func main() {
 	instructions := readNavigationInstructions()
-	ship := Ship{Position{0, 0}, E}
-	endPosition := followInstructions(ship, instructions)
+	ship := Ship{Position{0, 0}, E, Position{0, 0}}
+	endPosition := followInstructionsPartOne(ship, instructions)
 	partOneResult := endPosition.manhattanDistance()
 	fmt.Println(partOneResult)
+
+	instructions = readNavigationInstructions()
+	ship = Ship{Position{0, 0}, E, Position{1, 10}}
+	partTwoEndPosition := followInstructionsPartTwo(ship, instructions)
+	partTwoResult := partTwoEndPosition.manhattanDistance()
+	fmt.Println(partTwoResult)
 }
 
-func followInstructions(ship Ship, instructions []Instruction) Position {
+func followInstructionsPartTwo(ship Ship, instructions []Instruction) Position {
+	for _, instruction := range instructions {
+		if instruction.Action == "L" || instruction.Action == "R" {
+			ship = turnWaypoint(ship, instruction)
+		} else if instruction.Action == "F" {
+			ship = moveShip(ship, instruction)
+		} else {
+			ship = moveWaypoint(ship, instruction)
+		}
+	}
+	return ship.Position
+}
+
+func turnWaypoint(ship Ship, instruction Instruction) Ship {
+
+	numTurns := instruction.Value / 90
+	if instruction.Action == "L" {
+		numTurns = 4 - numTurns
+	}
+
+	var northing int
+	var easting int
+
+	switch numTurns {
+	case 1:
+		northing = -ship.Waypoint.Easting
+		easting = ship.Waypoint.Northing
+	case 2:
+		northing = -ship.Waypoint.Northing
+		easting = -ship.Waypoint.Easting
+	case 3:
+		northing = ship.Waypoint.Easting
+		easting = -ship.Waypoint.Northing
+	case 0:
+		northing = ship.Waypoint.Northing
+		easting = ship.Waypoint.Easting
+	}
+
+	ship.Waypoint = Position{northing, easting}
+	return ship
+}
+
+func moveShip(ship Ship, instruction Instruction) Ship {
+	ship.Position = ship.Position.move(ship.Waypoint, instruction.Value)
+	return ship
+}
+
+func moveWaypoint(ship Ship, instruction Instruction) Ship {
+	direction := movements[compassPoints[instruction.Action]]
+	times := instruction.Value
+	ship.Waypoint = ship.Waypoint.move(direction, times)
+	return ship
+}
+
+func followInstructionsPartOne(ship Ship, instructions []Instruction) Position {
 	for _, instruction := range instructions {
 		if instruction.Action == "L" || instruction.Action == "R" {
 			ship = turn(ship, instruction)
