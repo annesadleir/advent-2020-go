@@ -9,12 +9,12 @@ import (
 	"strings"
 )
 
-type Instruction struct {
+type InstructionD8 struct {
 	op  string
 	num int
 }
 
-func readInstructions() []Instruction {
+func readInstructions() []InstructionD8 {
 	file, err := os.Open("C:\\Workarea\\advent-2020-go\\inputs\\day08.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -22,12 +22,12 @@ func readInstructions() []Instruction {
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
 
-	instructions := make([]Instruction, 0)
+	instructions := make([]InstructionD8, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
 		parts := strings.Split(line, " ")
 		num, _ := strconv.Atoi(parts[1])
-		instructions = append(instructions, Instruction{parts[0], num})
+		instructions = append(instructions, InstructionD8{parts[0], num})
 	}
 
 	return instructions
@@ -41,7 +41,7 @@ func main() {
 	part2(instructions)
 }
 
-func part1(instructions []Instruction) {
+func part1(instructions []InstructionD8) {
 	accumulator := 0
 	counter := 0
 	visited := make([]bool, len(instructions)+1)
@@ -63,7 +63,7 @@ func part1(instructions []Instruction) {
 	fmt.Println(accumulator)
 }
 
-func part2(instructions []Instruction) {
+func part2(instructions []InstructionD8) {
 	changeIndex := 0
 	foundAnswer := false
 
@@ -78,10 +78,10 @@ func part2(instructions []Instruction) {
 	}
 }
 
-func copyWithChangeAt(instructions []Instruction, index int) []Instruction {
-	copy := make([]Instruction, len(instructions))
+func copyWithChangeAt(instructions []InstructionD8, index int) []InstructionD8 {
+	copy := make([]InstructionD8, len(instructions))
 	for i, instr := range instructions {
-		copy[i] = Instruction{instr.op, instr.num}
+		copy[i] = InstructionD8{instr.op, instr.num}
 	}
 	instrToChangeOp := instructions[index].op
 	if instrToChangeOp == "jmp" {
@@ -92,7 +92,7 @@ func copyWithChangeAt(instructions []Instruction, index int) []Instruction {
 	return copy
 }
 
-func test(instructions []Instruction) bool {
+func test(instructions []InstructionD8) bool {
 	accumulator := 0
 	counter := 0
 	visited := make([]bool, len(instructions)+1)
