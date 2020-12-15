@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -15,15 +14,14 @@ type BusRequirement struct {
 	Offset int64
 }
 
-func main() {
-	//originalBusRequirements := readBusSituationPartTwo()
-	originalBusRequirements := simpleBusSituation()
+func (busReq BusRequirement) String() string {
+	return fmt.Sprintf("Period: %d, offset: %d", busReq.Period, busReq.Offset)
+}
 
-	busRequirements := originalBusRequirements
-
-	sort.Slice(busRequirements, func(i, j int) bool {
-		return busRequirements[i].Period > busRequirements[j].Period
-	})
+func reduce(busRequirements []BusRequirement) BusRequirement {
+	//sort.Slice(busRequirements, func(i, j int) bool {
+	//	return busRequirements[i].Period < busRequirements[j].Period
+	//})
 
 	for len(busRequirements) > 1 {
 		newBusRequirement := combineBusRequirements(busRequirements[:2])
@@ -35,9 +33,16 @@ func main() {
 		busRequirements = smallerBusRequirements
 	}
 
-	lastReq := busRequirements[0]
+	return busRequirements[0]
+}
 
-	zeroPoint := -lastReq.Offset
+func partTwo(originalBusRequirements []BusRequirement) {
+
+	busRequirements := originalBusRequirements
+
+	lastReq := reduce(busRequirements)
+
+	zeroPoint := lastReq.Offset
 
 	for zeroPoint < 0 {
 		zeroPoint += lastReq.Period
@@ -48,25 +53,60 @@ func main() {
 	}
 
 	for _, req := range originalBusRequirements {
-		multiplicand := (zeroPoint + req.Offset) / req.Period
-		if multiplicand*req.Period-req.Offset != zeroPoint {
-			fmt.Print("error")
-		}
-
+		checkFitsReq("After reduction", zeroPoint, req)
 	}
 	fmt.Println(zeroPoint)
 }
 
+func main() {
+	partTwo(simpleBusSituation())
+	partTwo(nextBusSituation())
+	partTwo(thirdBusSituation())
+	partTwo(fourthBusSituation())
+	partTwo(fifthBusSituation())
+	partTwo(demoBusSituation())
+	partTwo(readBusSituationPartTwo())
+	
+	// correct answer = 404517869995362
+	// but I had to give up and calculate it in Java
+
+	// 1525636236640101
+	// 1525636236640101
+	// 1525636236640101
+	// 506410616693994
+
+	// fmt.Println(result.Offset)
+	// 313793439223925 wrong
+	// 1882780318552089
+	// 6722635721222522470
+	// 126337847429708
+	// 1502707549287803
+}
+
 func combineBusRequirements(requirements []BusRequirement) BusRequirement {
-	first := requirements[0]
-	second := requirements[1]
+	var first, second BusRequirement
+	if requirements[0].Period > requirements[1].Period {
+		first = requirements[0]
+		second = requirements[1]
+	} else {
+		first = requirements[1]
+		second = requirements[0]
+	}
+
 	// find Bezout numbers
 	firstBez, secondBez := Bezout(first.Period, second.Period)
+	if firstBez*first.Period+secondBez*second.Period != 1 {
+		panic("Bezout numbers not working???")
+	}
 
 	startPoint := firstBez*first.Period*second.Offset +
 		secondBez*second.Period*first.Offset
 
 	gcm := first.Period * second.Period
+
+	//for startPoint < 0 {
+	//	startPoint = -startPoint
+	//}
 
 	for startPoint < 0 {
 		startPoint += gcm
@@ -75,52 +115,18 @@ func combineBusRequirements(requirements []BusRequirement) BusRequirement {
 	for startPoint > gcm {
 		startPoint -= gcm
 	}
+
+	checkFitsReq("first in reduction", startPoint, first)
+	checkFitsReq("second in reduction", startPoint, second)
+
 	return BusRequirement{gcm, startPoint}
 }
 
-// 17,x,13,19
-func simpleBusSituation() []BusRequirement {
-	reqs := make([]BusRequirement, 0)
-	reqs = append(reqs, BusRequirement{17, 0})
-	reqs = append(reqs, BusRequirement{13, 2})
-	reqs = append(reqs, BusRequirement{19, 3})
-	return reqs
-}
-
-func nextBusSituation() []BusRequirement {
-	reqs := make([]BusRequirement, 0)
-	reqs = append(reqs, BusRequirement{67, 0})
-	reqs = append(reqs, BusRequirement{7, 1})
-	reqs = append(reqs, BusRequirement{59, 2})
-	reqs = append(reqs, BusRequirement{61, 3})
-	return reqs
-}
-
-func thirdBusSituation() []BusRequirement {
-	reqs := make([]BusRequirement, 0)
-	reqs = append(reqs, BusRequirement{67, 0})
-	reqs = append(reqs, BusRequirement{7, 2})
-	reqs = append(reqs, BusRequirement{59, 3})
-	reqs = append(reqs, BusRequirement{61, 4})
-	return reqs
-}
-
-func fourthBusSituation() []BusRequirement {
-	reqs := make([]BusRequirement, 0)
-	reqs = append(reqs, BusRequirement{67, 0})
-	reqs = append(reqs, BusRequirement{7, 1})
-	reqs = append(reqs, BusRequirement{59, 3})
-	reqs = append(reqs, BusRequirement{61, 4})
-	return reqs
-}
-
-func fifthBusSituation() []BusRequirement {
-	reqs := make([]BusRequirement, 0)
-	reqs = append(reqs, BusRequirement{1789, 0})
-	reqs = append(reqs, BusRequirement{37, 1})
-	reqs = append(reqs, BusRequirement{47, 2})
-	reqs = append(reqs, BusRequirement{1889, 3})
-	return reqs
+func checkFitsReq(info string, time int64, requirement BusRequirement) {
+	multiplicand := (time - requirement.Offset) / requirement.Period
+	if multiplicand*requirement.Period+requirement.Offset != time {
+		fmt.Println(info + ": " + requirement.String())
+	}
 }
 
 func readBusSituationPartTwo() []BusRequirement {
@@ -140,11 +146,20 @@ func readBusSituationPartTwo() []BusRequirement {
 	for index, id := range parts {
 		if id != "x" {
 			num, _ := strconv.ParseInt(id, 10, 64)
-			busReq := BusRequirement{Period: num, Offset: int64(index)}
+			//busReq := BusRequirement{Period: num, Offset: int64(index)}
+			busReq := createBusRequirement(num, int64(index))
 			buses = append(buses, busReq)
 		}
 	}
 	return buses
+}
+
+func createBusRequirement(period int64, offset int64) BusRequirement {
+	adjOffset := offset
+	for adjOffset > period {
+		adjOffset -= period
+	}
+	return BusRequirement{period, -adjOffset}
 }
 
 func Bezout(a, b int64) (x, y int64) {
@@ -170,4 +185,59 @@ func quotientSwapThing(oldX, x, quotient int64) (a, b int64) {
 	x = oldX - quotient*x
 	oldX = prov
 	return oldX, x
+}
+
+// 17,x,13,19
+func simpleBusSituation() []BusRequirement {
+	reqs := make([]BusRequirement, 0)
+	reqs = append(reqs, BusRequirement{17, 0})
+	reqs = append(reqs, BusRequirement{13, -2})
+	reqs = append(reqs, BusRequirement{19, -3})
+	return reqs
+}
+
+func nextBusSituation() []BusRequirement {
+	reqs := make([]BusRequirement, 0)
+	reqs = append(reqs, BusRequirement{67, 0})
+	reqs = append(reqs, BusRequirement{7, -1})
+	reqs = append(reqs, BusRequirement{59, -2})
+	reqs = append(reqs, BusRequirement{61, -3})
+	return reqs
+}
+
+func thirdBusSituation() []BusRequirement {
+	reqs := make([]BusRequirement, 0)
+	reqs = append(reqs, BusRequirement{67, 0})
+	reqs = append(reqs, BusRequirement{7, -2})
+	reqs = append(reqs, BusRequirement{59, -3})
+	reqs = append(reqs, BusRequirement{61, -4})
+	return reqs
+}
+
+func fourthBusSituation() []BusRequirement {
+	reqs := make([]BusRequirement, 0)
+	reqs = append(reqs, BusRequirement{67, 0})
+	reqs = append(reqs, BusRequirement{7, -1})
+	reqs = append(reqs, BusRequirement{59, -3})
+	reqs = append(reqs, BusRequirement{61, -4})
+	return reqs
+}
+
+func fifthBusSituation() []BusRequirement {
+	reqs := make([]BusRequirement, 0)
+	reqs = append(reqs, BusRequirement{1789, 0})
+	reqs = append(reqs, BusRequirement{37, -1})
+	reqs = append(reqs, BusRequirement{47, -2})
+	reqs = append(reqs, BusRequirement{1889, -3})
+	return reqs
+}
+
+func demoBusSituation() []BusRequirement {
+	reqs := make([]BusRequirement, 0)
+	reqs = append(reqs, BusRequirement{7, 0})
+	reqs = append(reqs, BusRequirement{13, -1})
+	reqs = append(reqs, BusRequirement{59, -4})
+	reqs = append(reqs, BusRequirement{31, -6})
+	reqs = append(reqs, BusRequirement{19, -7})
+	return reqs
 }
