@@ -66,7 +66,7 @@ func main() {
 	partTwo(fifthBusSituation())
 	partTwo(demoBusSituation())
 	partTwo(readBusSituationPartTwo())
-	
+
 	// correct answer = 404517869995362
 	// but I had to give up and calculate it in Java
 
